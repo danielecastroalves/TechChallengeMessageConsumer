@@ -1,4 +1,5 @@
 using MediatR;
+using FluentValidation;
 
 namespace FintechMessageConsumer.Application.Features.ClientProfile.SetClientProfile
 {
@@ -13,5 +14,14 @@ namespace FintechMessageConsumer.Application.Features.ClientProfile.SetClientPro
     {
         public Guid QuestionId { get; set; }
         public int QuestionValue { get; set; }
+    }
+
+    public class ClientProfileRequestValidator : AbstractValidator<SetClientProfileEvent>
+    {
+        public ClientProfileRequestValidator()
+        {
+            RuleFor(x => x.ClientId).NotEmpty().NotNull();
+            RuleFor(x => x.Questions).NotEmpty().NotNull();
+        }
     }
 }

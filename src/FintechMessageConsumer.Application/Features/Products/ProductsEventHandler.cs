@@ -7,38 +7,46 @@ namespace FintechMessageConsumer.Application.Features.Products
 {
     public class ProductsEventHandler : IRequestHandler<ProductsEvent>
     {
-        //private readonly IRepository<ClienteEntity> _repositorio;
-        //private readonly ILogger<ProductsEventHandler> _logger;
+        private readonly IRepository<ClienteEntity> _repositorio;
+        private readonly ILogger<ProductsEventHandler> _logger;
 
         public ProductsEventHandler
         (
-//            IRepository<ClienteEntity> repositorio,
- //           ILogger<ProductsEventHandler> logger
+            IRepository<ClienteEntity> repositorio,
+            ILogger<ProductsEventHandler> logger
         )
         {
-//            _repositorio = repositorio;
- //           _logger = logger;
+            _repositorio = repositorio;
+            _logger = logger;
         }
 
         public async Task<Unit> Handle(ProductsEvent request, CancellationToken cancellationToken)
         {
-            //cancellationToken.ThrowIfCancellationRequested();
+            cancellationToken.ThrowIfCancellationRequested();
 
-            //var entity = await _repositorio.GetByFilterAsync(x => x.Id == request.ClientId);
+            var entity = await _repositorio.GetByFilterAsync(x => x.Id == request.ClientId);
 
-            //entity.Wallet.Add(new Product { ProductId = request.ProductId, ValueInvested = request.ApplicationValue });
+            var newListProducts = new List<Product>() { new Product { ProductId = request.ProductId, ValueInvested = request.ApplicationValue } };
 
-            //await _repositorio.UpdateAsync(x => x.Id == request.ClientId, entity, CancellationToken.None);
+            entity.Wallet = entity.Wallet == null ? newListProducts : AddToList(request, entity);
 
-            //_logger.LogInformation(
-            //    "[ProductsEvent] " +
-            //    "[Client wallet has been updated successfully] " +
-            //    "[ClientId: {CliendId}] " +
-            //    "[ProductId: {ProductId}]",
-            //    request.ClientId,
-            //    request.ProductId);
+            await _repositorio.UpdateAsync(x => x.Id == request.ClientId, entity, CancellationToken.None);
+
+            _logger.LogInformation(
+                "[ProductsEvent] " +
+                "[Client wallet has been updated successfully] " +
+                "[ClientId: {CliendId}] " +
+                "[ProductId: {ProductId}]",
+                request.ClientId,
+                request.ProductId);
 
             return Unit.Value;
+        }
+
+        private List<Product> AddToList(ProductsEvent request, ClienteEntity entity)
+        {
+            entity.Wallet.Add(new Product { ProductId = request.ProductId, ValueInvested = request.ApplicationValue });
+            return entity.Wallet;
         }
     }
 }

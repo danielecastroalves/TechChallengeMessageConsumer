@@ -44,7 +44,6 @@ namespace FintechMessageConsumer.WebApi.Consumer
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             using var channel = _rabbitConnection.CreateModel();
-
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += async (model, ea) =>
             {
@@ -61,10 +60,10 @@ namespace FintechMessageConsumer.WebApi.Consumer
             };
 
             channel.BasicConsume(queue: _rabbitMqConfig.BuyProductQueue,
-                                 autoAck: false,
-                                 consumer: consumer);
+                                autoAck: false,
+                                consumer: consumer);
 
-            await Task.Delay(Timeout.Infinite, stoppingToken);
+            await Task.Delay(Timeout.Infinite, stoppingToken);                      
         }
     }
 }

@@ -1,12 +1,16 @@
 using System.Diagnostics.CodeAnalysis;
 using FintechMessageConsumer.Application;
 using FintechMessageConsumer.Application.Common.Configurations;
+using FintechMessageConsumer.Application.Common.Repositories;
 using FintechMessageConsumer.Application.Common.Services;
+using FintechMessageConsumer.Domain.Entities;
 using FintechMessageConsumer.Infrastructure.Mongo.Contexts;
 using FintechMessageConsumer.Infrastructure.Mongo.Contexts.Interfaces;
+using FintechMessageConsumer.Infrastructure.Mongo.Repositories;
 using FintechMessageConsumer.Infrastructure.Mongo.Utils;
 using FintechMessageConsumer.Infrastructure.Mongo.Utils.Interfaces;
 using FintechMessageConsumer.Infrastructure.RabbitMQ;
+using FintechMessageConsumer.WebApi.Consumer;
 using MediatR;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
@@ -63,6 +67,7 @@ namespace FintechMessageConsumer.WebApi.DependencyInjection
             services.AddSingleton<IMongoContext, MongoContext>();
 
             //Configure Mongo Repositories
+            services.AddScoped<IRepository<ClienteEntity>, GenericRepository<ClienteEntity>>();
 
             //Configure Mongo Serializer
             BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
@@ -100,6 +105,9 @@ namespace FintechMessageConsumer.WebApi.DependencyInjection
 
             // RabbitMQ Services
             services.AddSingleton<IMessagePublisherService, MessagePublisherService>();
+
+            services.AddHostedService<ClientProfileConsumer>();
+            services.AddHostedService<BuyProductConsumer>();
         }
 
         private static void ConfigureBindingsSerilog(IServiceCollection services)
