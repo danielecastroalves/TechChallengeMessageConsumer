@@ -1,6 +1,6 @@
 using System.Text;
 using FintechMessageConsumer.Application.Common.Configurations;
-using FintechMessageConsumer.Application.Features.ClientProfile.SetClientProfile;
+using FintechMessageConsumer.Application.Features.Products;
 using MediatR;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -50,17 +50,17 @@ namespace FintechMessageConsumer.WebApi.Consumer
             {
                 var body = ea.Body.ToArray();
 
-                var clientProfileEvent = JsonConvert.DeserializeObject<SetClientProfileEvent>(Encoding.UTF8.GetString(body));
+                var productsEvent = JsonConvert.DeserializeObject<ProductsEvent>(Encoding.UTF8.GetString(body));
 
                 using var scope = _serviceProvider.CreateScope();
                 var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
-                await mediator.Send(clientProfileEvent!);
+                await mediator.Send(productsEvent!);
 
                 channel.BasicAck(ea.DeliveryTag, false);
             };
 
-            channel.BasicConsume(queue: _rabbitMqConfig.ClientProfileQueue,
+            channel.BasicConsume(queue: _rabbitMqConfig.BuyProductQueue,
                                  autoAck: false,
                                  consumer: consumer);
 
