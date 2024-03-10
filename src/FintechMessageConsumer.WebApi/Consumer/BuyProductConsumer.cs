@@ -1,13 +1,13 @@
 using System.Text;
-using FintechGrupo10.Application.Common.Configurations;
-using FintechGrupo10.Application.Features.ClientProfile.SetClientProfile;
+using FintechMessageConsumer.Application.Common.Configurations;
+using FintechMessageConsumer.Application.Features.ClientProfile.SetClientProfile;
 using MediatR;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
-namespace FintechGrupo10.WebApi.Consumers
+namespace FintechMessageConsumer.WebApi.Consumer
 {
     /// <summary>
     /// Background Service for Buy Product RabbitMQ Consumer
