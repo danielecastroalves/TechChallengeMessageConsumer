@@ -1,12 +1,16 @@
 using System.Diagnostics.CodeAnalysis;
 using FintechMessageConsumer.Application;
 using FintechMessageConsumer.Application.Common.Configurations;
+using FintechMessageConsumer.Application.Common.Repositories;
 using FintechMessageConsumer.Application.Common.Services;
+using FintechMessageConsumer.Domain.Entities;
 using FintechMessageConsumer.Infrastructure.Mongo.Contexts;
 using FintechMessageConsumer.Infrastructure.Mongo.Contexts.Interfaces;
+using FintechMessageConsumer.Infrastructure.Mongo.Repositories;
 using FintechMessageConsumer.Infrastructure.Mongo.Utils;
 using FintechMessageConsumer.Infrastructure.Mongo.Utils.Interfaces;
 using FintechMessageConsumer.Infrastructure.RabbitMQ;
+using FintechMessageConsumer.WebApi.Consumer;
 using MediatR;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
@@ -39,6 +43,9 @@ namespace FintechMessageConsumer.WebApi.DependencyInjection
             ConfigureBindingsMongo(services, configuration);
             ConfigureBindingsRabbitMQ(services, configuration);
             ConfigureBindingsSerilog(services);
+
+            //Background Services
+            services.AddHostedService<ClientProfileConsumer>();
         }
 
         private static void ConfigureBindingsMediatR(IServiceCollection services)
@@ -63,6 +70,7 @@ namespace FintechMessageConsumer.WebApi.DependencyInjection
             services.AddSingleton<IMongoContext, MongoContext>();
 
             //Configure Mongo Repositories
+            services.AddScoped<IRepository<ClienteEntity>, GenericRepository<ClienteEntity>>();
 
             //Configure Mongo Serializer
             BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
@@ -77,7 +85,7 @@ namespace FintechMessageConsumer.WebApi.DependencyInjection
             (
                type =>
                        ObjectSerializer.DefaultAllowedTypes(type) ||
-                       type.FullName.StartsWith("FintechGrupo10.Domain")
+                       type.FullName.StartsWith("FintechMessageConsumer.Domain")
             );
             #pragma warning restore CS8602
 

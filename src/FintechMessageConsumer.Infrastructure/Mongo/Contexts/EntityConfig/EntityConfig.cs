@@ -1,7 +1,7 @@
+using System.Diagnostics.CodeAnalysis;
 using FintechMessageConsumer.Domain.Entities;
 using FintechMessageConsumer.Infrastructure.Mongo.Contexts.Interfaces;
 using MongoDB.Driver;
-using System.Diagnostics.CodeAnalysis;
 
 namespace FintechMessageConsumer.Infrastructure.Mongo.Contexts.EntityConfig
 {

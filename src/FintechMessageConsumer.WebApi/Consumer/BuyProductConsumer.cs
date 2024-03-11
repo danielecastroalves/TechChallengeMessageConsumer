@@ -43,28 +43,31 @@ namespace FintechMessageConsumer.WebApi.Consumer
         /// <returns>Task</returns>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            using var channel = _rabbitConnection.CreateModel();
-
-            var consumer = new EventingBasicConsumer(channel);
-            consumer.Received += async (model, ea) =>
+            while (!stoppingToken.IsCancellationRequested)
             {
-                var body = ea.Body.ToArray();
+                using var channel = _rabbitConnection.CreateModel();
 
-                var clientProfileEvent = JsonConvert.DeserializeObject<SetClientProfileEvent>(Encoding.UTF8.GetString(body));
+                var consumer = new EventingBasicConsumer(channel);
+                consumer.Received += async (model, ea) =>
+                {
+                    var body = ea.Body.ToArray();
 
-                using var scope = _serviceProvider.CreateScope();
-                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+                    var clientProfileEvent = JsonConvert.DeserializeObject<SetClientProfileEvent>(Encoding.UTF8.GetString(body));
 
-                await mediator.Send(clientProfileEvent!);
+                    using var scope = _serviceProvider.CreateScope();
+                    var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
-                channel.BasicAck(ea.DeliveryTag, false);
-            };
+                    await mediator.Send(clientProfileEvent!);
 
-            channel.BasicConsume(queue: _rabbitMqConfig.ClientProfileQueue,
-                                 autoAck: false,
-                                 consumer: consumer);
+                    channel.BasicAck(ea.DeliveryTag, false);
+                };
 
-            await Task.Delay(Timeout.Infinite, stoppingToken);
+                channel.BasicConsume(queue: _rabbitMqConfig.ClientProfileQueue,
+                                     autoAck: false,
+                                     consumer: consumer);
+
+                await Task.Delay(Timeout.Infinite, stoppingToken);
+            }
         }
     }
 }
