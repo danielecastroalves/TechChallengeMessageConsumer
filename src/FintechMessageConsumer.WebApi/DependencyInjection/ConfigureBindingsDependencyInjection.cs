@@ -46,6 +46,7 @@ namespace FintechMessageConsumer.WebApi.DependencyInjection
 
             //Background Services
             services.AddHostedService<ClientProfileConsumer>();
+            services.AddHostedService<BuyProductConsumer>();
         }
 
         private static void ConfigureBindingsMediatR(IServiceCollection services)
