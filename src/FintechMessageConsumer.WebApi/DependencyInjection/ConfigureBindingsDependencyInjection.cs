@@ -108,6 +108,9 @@ namespace FintechMessageConsumer.WebApi.DependencyInjection
 
             // RabbitMQ Services
             services.AddSingleton<IMessagePublisherService, MessagePublisherService>();
+
+            services.AddHostedService<ClientProfileConsumer>();
+            services.AddHostedService<BuyProductConsumer>();
         }
 
         private static void ConfigureBindingsSerilog(IServiceCollection services)

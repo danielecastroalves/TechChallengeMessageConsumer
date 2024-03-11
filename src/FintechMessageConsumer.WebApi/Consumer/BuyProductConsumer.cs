@@ -1,6 +1,6 @@
 using System.Text;
 using FintechMessageConsumer.Application.Common.Configurations;
-using FintechMessageConsumer.Application.Features.ClientProfile.SetClientProfile;
+using FintechMessageConsumer.Application.Features.Products;
 using MediatR;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -43,31 +43,27 @@ namespace FintechMessageConsumer.WebApi.Consumer
         /// <returns>Task</returns>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            while (!stoppingToken.IsCancellationRequested)
+            using var channel = _rabbitConnection.CreateModel();
+            var consumer = new EventingBasicConsumer(channel);
+            consumer.Received += async (model, ea) =>
             {
-                using var channel = _rabbitConnection.CreateModel();
+                var body = ea.Body.ToArray();
 
-                var consumer = new EventingBasicConsumer(channel);
-                consumer.Received += async (model, ea) =>
-                {
-                    var body = ea.Body.ToArray();
-
-                    var clientProfileEvent = JsonConvert.DeserializeObject<SetClientProfileEvent>(Encoding.UTF8.GetString(body));
+                var productsEvent = JsonConvert.DeserializeObject<ProductsEvent>(Encoding.UTF8.GetString(body));
 
                     using var scope = _serviceProvider.CreateScope();
                     var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
-                    await mediator.Send(clientProfileEvent!);
+                await mediator.Send(productsEvent!);
 
                     channel.BasicAck(ea.DeliveryTag, false);
                 };
 
-                channel.BasicConsume(queue: _rabbitMqConfig.ClientProfileQueue,
-                                     autoAck: false,
-                                     consumer: consumer);
+            channel.BasicConsume(queue: _rabbitMqConfig.BuyProductQueue,
+                                autoAck: false,
+                                consumer: consumer);
 
-                await Task.Delay(Timeout.Infinite, stoppingToken);
-            }
+            await Task.Delay(Timeout.Infinite, stoppingToken);                      
         }
     }
 }
