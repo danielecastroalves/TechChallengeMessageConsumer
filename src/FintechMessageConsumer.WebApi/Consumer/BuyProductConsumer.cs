@@ -65,7 +65,7 @@ namespace FintechMessageConsumer.WebApi.Consumer
                                     autoAck: false,
                                     consumer: consumer);
 
-                await Task.Delay(Timeout.Infinite, stoppingToken);
+                await Task.Delay(3000, stoppingToken);
             }
         }
     }
