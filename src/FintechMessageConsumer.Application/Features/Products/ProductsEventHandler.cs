@@ -8,16 +8,19 @@ namespace FintechMessageConsumer.Application.Features.Products
     public class ProductsEventHandler : IRequestHandler<ProductsEvent>
     {
         private readonly IRepository<ClienteEntity> _repositorio;
+        private readonly IRepository<TransactionEntity> _transactionRepository;
         private readonly ILogger<ProductsEventHandler> _logger;
 
         public ProductsEventHandler
         (
             IRepository<ClienteEntity> repositorio,
-            ILogger<ProductsEventHandler> logger
+            ILogger<ProductsEventHandler> logger,
+            IRepository<TransactionEntity> transactionRepository
         )
         {
             _repositorio = repositorio;
             _logger = logger;
+            _transactionRepository = transactionRepository;
         }
 
         public async Task<Unit> Handle(ProductsEvent request, CancellationToken cancellationToken)
@@ -26,9 +29,11 @@ namespace FintechMessageConsumer.Application.Features.Products
 
             var entity = await _repositorio.GetByFilterAsync(x => x.Id == request.ClientId);
 
-            var newListProducts = new List<Product>() { new Product { ProductId = request.ProductId, ValueInvested = request.ApplicationValue } };
+            await SaveTransaction(request, entity, cancellationToken);
 
-            entity.Wallet = entity.Wallet == null ? newListProducts : AddToList(request, entity);
+            var wallet = new List<Wallet>() { new Wallet { ProductId = request.ProductId } };
+
+            entity.Portfolio.Carteira = entity.Portfolio == null ? wallet : AddToList(request.ProductId, entity);
 
             await _repositorio.UpdateAsync(x => x.Id == request.ClientId, entity, CancellationToken.None);
 
@@ -43,10 +48,24 @@ namespace FintechMessageConsumer.Application.Features.Products
             return Unit.Value;
         }
 
-        private List<Product> AddToList(ProductsEvent request, ClienteEntity entity)
+        private async Task SaveTransaction(ProductsEvent request, ClienteEntity entity, CancellationToken cancellationToken)
         {
-            entity.Wallet.Add(new Product { ProductId = request.ProductId, ValueInvested = request.ApplicationValue });
-            return entity.Wallet;
+            var transaction = new TransactionEntity
+            {
+                AtivoId = request.ProductId,
+                PortfolioId = entity.Portfolio.Id,
+                Preco = request.Price,
+                Quantidade = request.Amount,
+                TipoTransacao = request.TransactionType
+            };
+
+            await _transactionRepository.AddAsync(transaction, cancellationToken);
+        }
+
+        private List<Wallet> AddToList(Guid productId, ClienteEntity entity)
+        {
+            entity.Portfolio.Carteira.Add(new Wallet { ProductId = productId });
+            return entity.Portfolio.Carteira;
         }
     }
 }
