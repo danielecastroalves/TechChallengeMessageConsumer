@@ -2,10 +2,10 @@ namespace FintechMessageConsumer.Domain.Entities
 {
     public abstract class Entity
     {
-        public Guid Id { get; set; }
-        public DateTime DataInsercao { get; set; }
-        public DateTime DataAtualizacao { get; set; }
-        public bool Ativo { get; set; }
+        public Guid Id { get; private set; }
+        public DateTime DataInsercao { get; private set; }
+        public DateTime DataAtualizacao { get; private set; }
+        public bool Ativo { get; private set; }
 
         protected Entity()
         {
@@ -26,16 +26,14 @@ namespace FintechMessageConsumer.Domain.Entities
             DataAtualizacao = DateTime.UtcNow;
         }
 
-        public void AtivaEntidade()
+        public void SetUsuarioAtivo()
         {
             Ativo = true;
-            SetDataAtualizacao();
         }
 
-        public void InativaEntidade()
+        public void SetUsuarioInativo()
         {
             Ativo = false;
-            SetDataAtualizacao();
         }
     }
 }

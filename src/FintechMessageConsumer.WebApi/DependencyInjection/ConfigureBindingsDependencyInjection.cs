@@ -72,19 +72,19 @@ namespace FintechMessageConsumer.WebApi.DependencyInjection
             //Configure Mongo Serializer
             BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
 
-#pragma warning disable 618
+            #pragma warning disable 618
             BsonDefaults.GuidRepresentation = GuidRepresentation.Standard;
             BsonDefaults.GuidRepresentationMode = GuidRepresentationMode.V3;
-#pragma warning restore
+            #pragma warning restore
 
-#pragma warning disable CS8602
+            #pragma warning disable CS8602
             var objectSerializer = new ObjectSerializer
             (
                type =>
                        ObjectSerializer.DefaultAllowedTypes(type) ||
                        type.FullName.StartsWith("FintechMessageConsumer.Domain")
             );
-#pragma warning restore CS8602
+            #pragma warning restore CS8602
 
             BsonSerializer.RegisterSerializer(objectSerializer);
         }
@@ -108,6 +108,7 @@ namespace FintechMessageConsumer.WebApi.DependencyInjection
 
             services.AddHostedService<ClientProfileConsumer>();
             services.AddHostedService<BuyProductConsumer>();
+            services.AddHostedService<SellProductConsumer>();
         }
 
         private static void ConfigureBindingsSerilog(IServiceCollection services)

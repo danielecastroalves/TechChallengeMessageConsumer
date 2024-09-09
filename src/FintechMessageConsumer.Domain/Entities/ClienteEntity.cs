@@ -9,8 +9,8 @@ namespace FintechMessageConsumer.Domain.Entities
         public string Telefone { get; set; } = null!;
         public string Email { get; set; } = null!;
         public DateTime DataNascimento { get; set; }
-        public InvestorProfile PerfilInvestimento { get; set; } = InvestorProfile.Indefinido;
-        public PortfolioEntity? Portfolio {  get; set; }
+        public string PerfilInvestimento { get; set; } = nameof(InvestorProfile.Indefinido);
+        public List<Guid> Portfolios { get; set; } = [];
     }
 
     public class User : Entity

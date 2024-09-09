@@ -1,6 +1,6 @@
 using System.Text;
 using FintechMessageConsumer.Application.Common.Configurations;
-using FintechMessageConsumer.Application.Features.Products.BuyProduct;
+using FintechMessageConsumer.Application.Features.Products.SellProduct;
 using MediatR;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -10,9 +10,9 @@ using RabbitMQ.Client.Events;
 namespace FintechMessageConsumer.WebApi.Consumer
 {
     /// <summary>
-    /// Background Service for Buy Product RabbitMQ Consumer
+    /// Background Service for SellProduct RabbitMQ Consumer
     /// </summary>
-    public class BuyProductConsumer : BackgroundService
+    public class SellProductConsumer : BackgroundService
     {
         private readonly IConnection _rabbitConnection;
         private readonly IServiceProvider _serviceProvider;
@@ -24,7 +24,7 @@ namespace FintechMessageConsumer.WebApi.Consumer
         /// <param name="rabbitConnection">RabbitMQ Connection</param>
         /// <param name="serviceProvider">Service Provider</param>
         /// <param name="options">RabbitMQ Config Options</param>
-        public BuyProductConsumer
+        public SellProductConsumer
         (
             IConnection rabbitConnection,
             IServiceProvider serviceProvider,
@@ -51,17 +51,17 @@ namespace FintechMessageConsumer.WebApi.Consumer
                 {
                     var body = ea.Body.ToArray();
 
-                    var buyProductEvent = JsonConvert.DeserializeObject<BuyProductEvent>(Encoding.UTF8.GetString(body));
+                    var sellProductEvent = JsonConvert.DeserializeObject<SellProductEvent>(Encoding.UTF8.GetString(body));
 
                     using var scope = _serviceProvider.CreateScope();
                     var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
-                    await mediator.Send(buyProductEvent!);
+                    await mediator.Send(sellProductEvent!);
 
                     channel.BasicAck(ea.DeliveryTag, false);
                 };
 
-                channel.BasicConsume(queue: _rabbitMqConfig.BuyProductQueue,
+                channel.BasicConsume(queue: _rabbitMqConfig.SellProductQueue,
                                     autoAck: false,
                                     consumer: consumer);
 
