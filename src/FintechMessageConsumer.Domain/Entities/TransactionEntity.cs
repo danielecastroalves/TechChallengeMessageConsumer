@@ -4,14 +4,9 @@ namespace FintechMessageConsumer.Domain.Entities
     {
         public Guid PortfolioId { get; set; }
         public Guid AtivoId { get; set; }
-        public TransactionType TipoTransacao { get; set; }
+        public string TipoTransacao { get; set; } = null!;
         public int Quantidade { get; set; }
-        public decimal Preco {  get; set; }
-    }
-
-    public enum TransactionType
-    {
-        Buy,
-        Sale
+        public decimal Preco { get; set; }
+        public DateTime DataTransacao { get; set; }
     }
 }

@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace FintechMessageConsumer.Application.Features.ClientProfile.SetClientProfile
 {
-    public class SetClientProfileEvent : IRequest
+    public class SetClientProfileEvent : IRequest<Unit> 
     {
         public Guid ClientId { get; set; }
 

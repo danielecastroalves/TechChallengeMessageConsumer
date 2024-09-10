@@ -1,5 +1,6 @@
 using FintechMessageConsumer.Application.Common.Repositories;
 using FintechMessageConsumer.Domain.Entities;
+using FintechMessageConsumer.Domain.Enums;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -7,65 +8,95 @@ namespace FintechMessageConsumer.Application.Features.Products.SellProduct
 {
     public class SellProductEventHandler : IRequestHandler<SellProductEvent>
     {
-        private readonly IRepository<ClienteEntity> _repositorio;
+        private readonly IRepository<ClienteEntity> _clienteRepository;
+        private readonly IRepository<PortfolioEntity> _portfolioRepository;
         private readonly IRepository<TransactionEntity> _transactionRepository;
         private readonly ILogger<SellProductEventHandler> _logger;
 
         public SellProductEventHandler
         (
             IRepository<ClienteEntity> repositorio,
-            ILogger<SellProductEventHandler> logger,
-            IRepository<TransactionEntity> transactionRepository
+            IRepository<PortfolioEntity> portfolioRepository,
+            IRepository<TransactionEntity> transactionRepository,
+            ILogger<SellProductEventHandler> logger
         )
         {
-            _repositorio = repositorio;
-            _logger = logger;
+            _clienteRepository = repositorio;
+            _portfolioRepository = portfolioRepository;
             _transactionRepository = transactionRepository;
+            _logger = logger;
         }
 
-        public async Task<Unit> Handle(SellProductEvent request, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(SellProductEvent @event, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var entity = await _repositorio.GetByFilterAsync(x => x.Id == request.IdCliente);
+            var clienteEntity = await _clienteRepository
+                .GetByFilterAsync(x => x.Id == @event.IdCliente, cancellationToken);
 
-            await SaveTransaction(request, entity, cancellationToken);
+            var portfolioEntity = await _portfolioRepository
+                .GetListByFilterAsync(x => x.UsuarioId == @event.IdCliente, cancellationToken);
 
-            var wallet = new List<Wallet>() { new Wallet { ProductId = request.IdProduto } };
+            if (clienteEntity.Portfolios.Count == 0)
+            {
+                _logger.LogError("[SellProduct] " +
+                    "[Portfolio not Found] " +
+                    "[ClientId: {CliendId}] ",
+                    @event.IdCliente);
 
-            entity.Portfolio.Carteira = entity.Portfolio == null ? wallet : AddToList(request.IdProduto, entity);
+                return Unit.Value;
+            }
 
-            await _repositorio.UpdateAsync(x => x.Id == request.IdCliente, entity, CancellationToken.None);
+            var portfolio = portfolioEntity
+                .First(x => x.Ativos.Exists(x => x.IdProduto == @event.IdProduto));
+
+            await SavePortfolio(@event, portfolio, cancellationToken);
 
             _logger.LogInformation(
-                "[ProductsEvent] " +
+                "[SellProduct] " +
                 "[Client wallet has been updated successfully] " +
                 "[ClientId: {CliendId}] " +
                 "[ProductId: {ProductId}]",
-                request.IdCliente,
-                request.IdProduto);
+                @event.IdCliente,
+                @event.IdProduto);
 
             return Unit.Value;
         }
 
-        private async Task SaveTransaction(SellProductEvent request, ClienteEntity entity, CancellationToken cancellationToken)
+        private async Task SavePortfolio
+        (
+            SellProductEvent @event,
+            PortfolioEntity portfolioEntity,
+            CancellationToken cancellationToken
+        )
+        {
+            portfolioEntity.Ativos.First(x => x.IdProduto == @event.IdProduto).QuantidadeCotas += @event.Quantidade;
+            portfolioEntity.Ativos.First(x => x.IdProduto == @event.IdProduto).ValorTotal += @event.Preco;
+
+            await _portfolioRepository
+                .UpdateAsync(x => x.Id == portfolioEntity.Id, portfolioEntity, cancellationToken);
+
+            await SaveTransaction(@event, portfolioEntity, cancellationToken);
+        }
+
+        private async Task SaveTransaction
+        (
+            SellProductEvent @event,
+            PortfolioEntity portfolioEntity,
+            CancellationToken cancellationToken
+        )
         {
             var transaction = new TransactionEntity
             {
-                AtivoId = request.ProductId,
-                PortfolioId = entity.Portfolio.Id,
-                Preco = request.Price,
-                Quantidade = request.Amount,
-                TipoTransacao = request.TransactionType
+                PortfolioId = portfolioEntity.Id,
+                AtivoId = @event.IdProduto,
+                TipoTransacao = nameof(TransacationType.Compra),
+                Quantidade = @event.Quantidade,
+                Preco = @event.Preco,
+                DataTransacao = DateTime.Now
             };
 
             await _transactionRepository.AddAsync(transaction, cancellationToken);
-        }
-
-        private List<Wallet> AddToList(Guid productId, ClienteEntity entity)
-        {
-            entity.Portfolio.Carteira.Add(new Wallet { ProductId = productId });
-            return entity.Portfolio.Carteira;
         }
     }
 }

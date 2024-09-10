@@ -3,7 +3,7 @@ using MediatR;
 
 namespace FintechMessageConsumer.Application.Features.Products.BuyProduct
 {
-    public class BuyProductEvent : IRequest
+    public class BuyProductEvent : IRequest<Unit>
     {
         public Guid IdProduto { get; set; }
         public Guid IdCliente { get; set; }

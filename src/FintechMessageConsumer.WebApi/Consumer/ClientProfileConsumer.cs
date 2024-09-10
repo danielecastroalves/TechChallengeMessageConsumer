@@ -48,6 +48,7 @@ namespace FintechMessageConsumer.WebApi.Consumer
                 using var channel = _rabbitConnection.CreateModel();
 
                 var consumer = new EventingBasicConsumer(channel);
+
                 consumer.Received += async (model, ea) =>
                 {
                     var body = ea.Body.ToArray();

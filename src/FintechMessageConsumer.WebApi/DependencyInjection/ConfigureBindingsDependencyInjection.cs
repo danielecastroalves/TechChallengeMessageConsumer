@@ -68,6 +68,8 @@ namespace FintechMessageConsumer.WebApi.DependencyInjection
 
             //Configure Mongo Repositories
             services.AddScoped<IRepository<ClienteEntity>, GenericRepository<ClienteEntity>>();
+            services.AddScoped<IRepository<PortfolioEntity>, GenericRepository<PortfolioEntity>>();
+            services.AddScoped<IRepository<TransactionEntity>, GenericRepository<TransactionEntity>>();
 
             //Configure Mongo Serializer
             BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));

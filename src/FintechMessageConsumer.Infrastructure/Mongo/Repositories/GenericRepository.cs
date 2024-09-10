@@ -82,7 +82,10 @@ namespace FintechMessageConsumer.Infrastructure.Mongo.Repositories
             entity.SetDataAtualizacao();
 
             await _context.GetCollection<TEntity>()
-                .ReplaceOneAsync(filter, entity, cancellationToken: cancellationToken);
+                .ReplaceOneAsync(filter,
+                                 entity,
+                                 new ReplaceOptions { IsUpsert = true },
+                                 cancellationToken: cancellationToken);
         }
 
         public virtual async Task<bool> DeleteByIdAsync
