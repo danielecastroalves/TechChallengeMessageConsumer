@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace FintechMessageConsumer.Application.Features.ClientProfile.SetClientProfile
 {
-    public class SetClientProfileEvent : IRequest
+    public class SetClientProfileEvent : IRequest<Unit> 
     {
         public Guid ClientId { get; set; }
 
@@ -16,9 +16,9 @@ namespace FintechMessageConsumer.Application.Features.ClientProfile.SetClientPro
         public int QuestionValue { get; set; }
     }
 
-    public class ClientProfileRequestValidator : AbstractValidator<SetClientProfileEvent>
+    public class ClientProfileEventValidator : AbstractValidator<SetClientProfileEvent>
     {
-        public ClientProfileRequestValidator()
+        public ClientProfileEventValidator()
         {
             RuleFor(x => x.ClientId).NotEmpty().NotNull();
             RuleFor(x => x.Questions).NotEmpty().NotNull();
