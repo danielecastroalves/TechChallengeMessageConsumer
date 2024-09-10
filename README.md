@@ -54,9 +54,28 @@ Exemplo de evento a ser consumido:
 
 ```json
 {
-  "productId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  "applicationValue": 0,
-  "clientId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+  "idProduto": "efc58f96-805b-4bb6-af0a-70d716211473",
+  "idCliente": "170ae64c-8817-425a-ad79-518ded55052e",
+  "quantidade": 10,
+  "preco": 100
+}
+```
+
+**SellProductQueue**
+
+- **Nome na Configuração da Aplicação:** `SellProductQueue`
+- **Nome da fila no RabbitMQ:** `venda-produto`
+- **Durable**: `true`
+- **Descrição:** Esta fila é utilizada para processar mensagens relacionadas a vendas de produtos de investimentos pelos usuários da aplicação FintechGrupo10.
+
+Exemplo de evento a ser consumido:
+
+```json
+{
+  "idProduto": "efc58f96-805b-4bb6-af0a-70d716211473",
+  "idCliente": "170ae64c-8817-425a-ad79-518ded55052e",
+  "quantidade": 10,
+  "preco": 100
 }
 ```
 
@@ -74,3 +93,5 @@ Configure o arquivo `appsettings.json` com as informações necessárias para ca
 ## **Dependências**
 
 - .NET 8
+- MongoDb
+- RabbitMQ
