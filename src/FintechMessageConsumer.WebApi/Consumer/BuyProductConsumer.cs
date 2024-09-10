@@ -1,6 +1,6 @@
 using System.Text;
 using FintechMessageConsumer.Application.Common.Configurations;
-using FintechMessageConsumer.Application.Features.Products;
+using FintechMessageConsumer.Application.Features.Products.BuyProduct;
 using MediatR;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -46,24 +46,26 @@ namespace FintechMessageConsumer.WebApi.Consumer
             while (!stoppingToken.IsCancellationRequested)
             {
                 using var channel = _rabbitConnection.CreateModel();
+
                 var consumer = new EventingBasicConsumer(channel);
+
                 consumer.Received += async (model, ea) =>
                 {
                     var body = ea.Body.ToArray();
 
-                    var productsEvent = JsonConvert.DeserializeObject<ProductsEvent>(Encoding.UTF8.GetString(body));
+                    var buyProductEvent = JsonConvert.DeserializeObject<BuyProductEvent>(Encoding.UTF8.GetString(body));
 
                     using var scope = _serviceProvider.CreateScope();
                     var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
-                    await mediator.Send(productsEvent!);
+                    await mediator.Send(buyProductEvent!);
 
                     channel.BasicAck(ea.DeliveryTag, false);
                 };
 
                 channel.BasicConsume(queue: _rabbitMqConfig.BuyProductQueue,
-                                    autoAck: false,
-                                    consumer: consumer);
+                                     autoAck: false,
+                                     consumer: consumer);
 
                 await Task.Delay(3000, stoppingToken);
             }

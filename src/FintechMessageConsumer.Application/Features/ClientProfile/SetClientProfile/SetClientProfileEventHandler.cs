@@ -32,7 +32,7 @@ namespace FintechMessageConsumer.Application.Features.ClientProfile.SetClientPro
                 totalPoints += value.QuestionValue;
             }
 
-            var investorProfile = SetInvertorProfile(totalPoints);
+            var investorProfile = SetInvestorProfile(totalPoints);
 
             await UpdateInvestorProfile(investorProfile, request.ClientId);
 
@@ -47,7 +47,7 @@ namespace FintechMessageConsumer.Application.Features.ClientProfile.SetClientPro
             return Unit.Value;
         }
 
-        private static InvestorProfile SetInvertorProfile(int pontuacaoTotal)
+        private static InvestorProfile SetInvestorProfile(int pontuacaoTotal)
         {
             InvestorProfile profile = InvestorProfile.Indefinido;
 
@@ -67,7 +67,7 @@ namespace FintechMessageConsumer.Application.Features.ClientProfile.SetClientPro
         {
             var entity = await _repositorio.GetByFilterAsync(x => x.Id == clientId);
 
-            entity.PerfilInvestimento = investorProfile;
+            entity.PerfilInvestimento = investorProfile.ToString();
 
             await _repositorio.UpdateAsync(x => x.Id == clientId, entity, CancellationToken.None);
         }

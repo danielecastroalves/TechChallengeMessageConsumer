@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using FintechMessageConsumer.WebApi.Consumer;
 using FintechMessageConsumer.WebApi.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,9 +13,6 @@ builder.Services.AddSwaggerGen();
 
 // DependencyInjections
 ConfigureBindingsDependencyInjection.RegisterBindings(builder.Services, builder.Configuration);
-
-builder.Services.AddHostedService<ClientProfileConsumer>();
-builder.Services.AddHostedService<BuyProductConsumer>();
 
 var app = builder.Build();
 
